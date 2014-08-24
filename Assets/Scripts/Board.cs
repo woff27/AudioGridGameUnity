@@ -11,13 +11,11 @@ public class Board : MonoBehaviour {
 	private int v; //for loop board creation, height
 	public GameObject grid; //Prefab (set in inspector)
 	public Material sSquare; //Green material for starting square
-	public GameObject Spotlight; //spawns on each grid block (in Inspector)
 	public int startLimit; //How many times you can click to create a start block
 	private int startCount; //Current amount of start blocks
 	public Vector3[,] gridArray = new Vector3[5,5]; //2D array for newgrid positions
 	public GameObject[,] gridList = new GameObject[5,5]; //2d array for gameobjects themselves
-	public GameObject newgrid; //instantiated prefab 
-	public GameObject greenSpot; //instantiated spotlight for start block
+	public GameObject newgrid; //instantiated prefab
 	private int Count; //for tag iteration
 	
 	void Awake () 
@@ -76,7 +74,6 @@ public class Board : MonoBehaviour {
 							//change to green material for start square
 							hit.collider.renderer.material = sSquare;
 							hit.transform.tag = "sSquare";
-							greenSpot = (GameObject) Instantiate(Spotlight, hit.collider.transform.position + new Vector3(0,0,-4), Quaternion.identity);
 							startCount++; 
 						}
 					}
@@ -84,30 +81,30 @@ public class Board : MonoBehaviour {
 			}
 		}
 		//Checking for square and changing other squares
-		for (int x = 0; x < 5; x++)
-		{
-			for (int y = 0; y < 5; y++)
-			{
-				if(gridList[x,y].transform.tag == "sSquare")
-				{
-					if(x<4)
-					{
-						gridList[x+1,y].collider.renderer.material = sSquare;
-					}
-					if(y<4)
-					{
-						gridList[x,(y+1)].collider.renderer.material = sSquare;
-					}
-					if(x>0)
-					{
-						gridList[(x-1),y].collider.renderer.material = sSquare;
-					}
-					if(y>0)
-					{
-						gridList[x,(y-1)].collider.renderer.material = sSquare;
-					}
-				}
-			}
-		}
+//		for (int x = 0; x < 5; x++)
+//		{
+//			for (int y = 0; y < 5; y++)
+//			{
+//				if(gridList[x,y].transform.tag == "sSquare")
+//				{
+//					if(x<4)
+//					{
+//						gridList[x+2,y].collider.renderer.material = sSquare;
+//					}
+//					if(y<4)
+//					{
+//						gridList[x,(y+2)].collider.renderer.material = sSquare;
+//					}
+//					if(x>0)
+//					{
+//						gridList[(x-2),y].collider.renderer.material = sSquare;
+//					}
+//					if(y>0)
+//					{
+//						gridList[x,(y-2)].collider.renderer.material = sSquare;
+//					}
+//				}
+//			}
+//		}
 	}
 }
