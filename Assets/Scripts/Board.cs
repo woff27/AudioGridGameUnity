@@ -3,8 +3,8 @@ using System.Collections;
 
 public class Board : MonoBehaviour {
 
-	private int boardW = 7; //used for initial board width (in Inspector)
-	private int boardH = 7; //used for initial board height (in Inspector)
+	private int boardW = 7; //used for initial board width 
+	private int boardH = 7; //used for initial board height 
 	private float bX; //position in x of grid blocks
 	private float bY; //posiiton in y of grid blocks
 	private int i; //for loop grid creation, width
@@ -16,12 +16,20 @@ public class Board : MonoBehaviour {
 	private int startCount; //Current amount of start blocks
 	public Vector3[,] gridArray = new Vector3[7,7]; //2D array for newgrid positions
 	public GameObject[,] gridList = new GameObject[7,7]; //2d array for gameobjects themselves
+	public GameObject[,] lightList = new GameObject[7,7];
 	public Component[,] scriptList = new Component[7,7]; //2d array for the scripts in each cell
+	
+	public Material GridChild;
 
-	public GameObject newgrid; //instantiated prefab
+	private GameObject newgrid; //instantiated prefab
+	private GameObject SpotL; // Light
+	public GameObject SpotLight;
+	private GameObject SLight;
 	private int Count; //for tag iteration
 	private int time = 0;
 
+	private Color lerpColor = Color.Lerp (Color.cyan, Color.green, 1f);
+	
 	public void MouseDown()
 	{
 		//check if too many start blocks are on
@@ -73,7 +81,13 @@ public class Board : MonoBehaviour {
 				//Arrays for positions and GameObjects
 				gridList[i,v] = newgrid;
 				StateScript SS = (StateScript)gridList[i,v].transform.GetComponent("StateScript");
-				scriptList[i,v] = SS;
+
+				foreach(Transform child in gridList[i,v].transform)
+				{
+					lightList[i,v] = child.gameObject;
+				}
+
+
 
 				Count++;
 			}
@@ -81,18 +95,12 @@ public class Board : MonoBehaviour {
 			bY+=1.5f;
 			bX=-3.0f;
 		}
+
 	}
 
 	public void tickCells()
 	{
-		for(int x = 0; x<7; x++)
-		{
-			for(int y = 0; y<7; y++)
-			{
-				gridList[x,y].GetComponent<StateScript>().Surround(x,y);
-			}
-		}
-
+		//State switching
 		for(int x = 0; x<7; x++)
 		{
 			for(int y = 0; y<7; y++)
@@ -102,17 +110,74 @@ public class Board : MonoBehaviour {
 				SS.Cell.olddown = SS.Cell.down;
 				SS.Cell.oldleft = SS.Cell.left;
 				SS.Cell.oldright = SS.Cell.right;
+
+//				if(SS.Cell.up && SS.Cell.down && SS.Cell.left && SS.Cell.right == false)
+//				{
+//					gridList[x,y].collider.renderer.material = BlankGrid;
+//				}
+
+				if(SS.Cell.up || SS.Cell.down || SS.Cell.left || SS.Cell.right == true)
+				{
+					gridList[x,y].collider.renderer.material = GridChild;
+					lightList[x,y].SetActive(true);
+				}
+
+				if(gridList[x,y].transform.tag == "sSquare")
+				{
+					if(gridList[x,y].collider.renderer.material != sSquare)
+					{
+						SS.Cell.up = SS.Cell.down = SS.Cell.left = SS.Cell.right = true;
+					}
+					gridList[x,y].collider.renderer.material = sSquare;
+					lightList[x,y].SetActive(true);
+					lightList[x,y].light.color = lerpColor;
+
+				}
+
+				SS.Cell.up = SS.Cell.down = SS.Cell.left = SS.Cell.right = false;
+			}
+		}
+
+		//Check other cells
+		for(int x = 0; x<7; x++)
+		{
+			for(int y = 0; y<7; y++)
+			{
+				gridList[x,y].GetComponent<StateScript>().Surround(x,y);
 			}
 		}
 	}
-
+	
 	public void TimedCellCheck()
 	{
 		time++;
 		if(time>30)
 		{
+			for(int x = 0; x<7; x++)
+			{
+				for(int y = 0; y<7; y++)
+				{
+					if(gridList[x,y].collider.renderer.material != sSquare)
+					{
+						gridList[x,y].collider.renderer.material = BlankGrid;
+						lightList[x,y].SetActive(false);
+					}
+				}
+			}
+
 			time = 0;
 			tickCells();
+		}
+	}
+
+	public void Flashing()
+	{
+		for(int x = 0; x<7; x++)
+		{
+			for(int y = 0; y<7; y++)
+			{
+				lightList[x,y].light.intensity = Random.Range(0,10);
+			}
 		}
 	}
 
@@ -125,6 +190,6 @@ public class Board : MonoBehaviour {
 	{
 		MouseDown();
 		TimedCellCheck();
-
+		Flashing();
 	}
 }
